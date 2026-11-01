@@ -1,0 +1,48 @@
+#include<stdio.h>
+#include<stdlib.h>
+
+int main()
+{
+    int a[20],n,h,i,j,t,seek=0;
+    int size=200;
+
+    printf("Enter number of requests: ");
+    scanf("%d",&n);
+
+    printf("Enter requests: ");
+    for(i=0;i<n;i++)
+        scanf("%d",&a[i]);
+
+    printf("Enter head position: ");
+    scanf("%d",&h);
+
+    for(i=0;i<n;i++)
+        for(j=i+1;j<n;j++)
+            if(a[i]>a[j])
+                t=a[i],a[i]=a[j],a[j]=t;
+
+    printf("Seek Sequence: ");
+
+    for(i=0;i<n;i++)
+        if(a[i]>=h)
+        {
+            printf("%d ",a[i]);
+            seek+=abs(h-a[i]);
+            h=a[i];
+        }
+
+    seek+=abs(h-(size-1));
+    h=size-1;
+
+    for(i=n-1;i>=0;i--)
+        if(a[i]<h && a[i]<a[n-1])
+        {
+            printf("%d ",a[i]);
+            seek+=abs(h-a[i]);
+            h=a[i];
+        }
+
+    printf("\nTotal Seek Time = %d",seek);
+
+    return 0;
+}

@@ -1,0 +1,53 @@
+
+#include <stdio.h>
+#include <stdlib.h>
+
+int main() {
+    int n, head, i, j, total = 0;
+    int a[20], temp;
+
+    printf("Enter number of requests: ");
+    scanf("%d", &n);
+
+    printf("Enter request queue:\n");
+    for(i = 0; i < n; i++)
+        scanf("%d", &a[i]);
+
+    printf("Enter initial head position: ");
+    scanf("%d", &head);
+
+    // Sort requests in ascending order
+    for(i = 0; i < n-1; i++) {
+        for(j = 0; j < n-i-1; j++) {
+            if(a[j] > a[j+1]) {
+                temp = a[j];
+                a[j] = a[j+1];
+                a[j+1] = temp;
+            }
+        }
+    }
+
+    printf("\nSeek Sequence: %d", head);
+
+    // Move towards higher cylinder numbers
+    for(i = 0; i < n; i++) {
+        if(a[i] >= head) {
+            printf(" -> %d", a[i]);
+            total += abs(head - a[i]);
+            head = a[i];
+        }
+    }
+
+    // Jump to the lowest request
+    for(i = 0; i < n; i++) {
+        if(a[i] < head) {
+            printf(" -> %d", a[i]);
+            total += abs(head - a[i]);
+            head = a[i];
+        }
+    }
+
+    printf("\nTotal head movement = %d\n", total);
+
+    return 0;
+}
