@@ -1,59 +1,68 @@
-#include<stdio.h>
-#include<pthread.h>
-#include<semaphore.h>
-#include<unistd.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <semaphore.h>
+#include <unistd.h>
+#include <time.h>
 
-sem_t room;
-sem_t forks[5];
+int buffer, count, pdelay, cdelay;
+sem_t empty, full;
+pthread_mutex_t mutex;
 
-void *philosopher(void *p)
+void *producer(void *arg)
 {
-    int i = *(int*)p;
+    for (int i = 0; i < count; i++) {
+        int item = rand() % 100 + 1;
 
-    printf("Philosopher %d is thinking\n", i);
+        sleep(pdelay);
+        sem_wait(&empty);
+        pthread_mutex_lock(&mutex);
 
-    sem_wait(&room);
-    sem_wait(&forks[i]);
-    sem_wait(&forks[(i+1)%5]);
+        buffer = item;
+        printf("Producer produced %d\n", item);
 
-    printf("Philosopher %d is eating\n", i);
+        pthread_mutex_unlock(&mutex);
+        sem_post(&full);
+    }
+    return NULL;
+}
 
-    sleep(2);
+void *consumer(void *arg)
+{
+    for (int i = 0; i < count; i++) {
+        sem_wait(&full);
+        pthread_mutex_lock(&mutex);
 
-    printf("Philosopher %d finished eating\n", i);
+        printf("Consumer consumed %d\n", buffer);
 
-    sem_post(&forks[i]);
-    sem_post(&forks[(i+1)%5]);
-    sem_post(&room);
-
+        pthread_mutex_unlock(&mutex);
+        sem_post(&empty);
+        sleep(cdelay);
+    }
     return NULL;
 }
 
 int main()
 {
-    pthread_t t[5];
-    int i, id[5];
+    pthread_t p, c;
 
-    sem_init(&room, 0, 4);
+    printf("Enter number of items: ");
+    scanf("%d", &count);
+    printf("Enter producer delay: ");
+    scanf("%d", &pdelay);
+    printf("Enter consumer delay: ");
+    scanf("%d", &cdelay);
+    srand(time(NULL));
 
-    for(i = 0; i < 5; i++)
-        sem_init(&forks[i], 0, 1);
+    sem_init(&empty, 0, 1);
+    sem_init(&full, 0, 0);
+    pthread_mutex_init(&mutex, NULL);
 
-    for(i = 0; i < 5; i++)
-    {
-        id[i] = i;
-        pthread_create(&t[i], NULL, philosopher, &id[i]);
-    }
+    pthread_create(&p, NULL, producer, NULL);
+    pthread_create(&c, NULL, consumer, NULL);
 
-    for(i = 0; i < 5; i++)
-        pthread_join(t[i], NULL);
-
-    for(i = 0; i < 5; i++)
-        sem_destroy(&forks[i]);
-
-    sem_destroy(&room);
-
-    printf("Exit the program\n");
+    pthread_join(p, NULL);
+    pthread_join(c, NULL);
 
     return 0;
 }
