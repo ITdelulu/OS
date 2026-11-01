@@ -20,11 +20,7 @@ do
             ;;
 
         2)
-            if [ -s "$file" ]; then
-                cat "$file"
-            else
-                echo "Address book is empty"
-            fi
+            cat "$file"
             ;;
 
         3)
@@ -36,27 +32,19 @@ do
 
         4)
             read -p "Enter name to delete: " name
-            if grep -q "^$name " "$file"; then
-                sed -i "/^$name /d" "$file"
-                echo "Record deleted"
-            else
-                echo "Record not found"
-            fi
+            sed -i "/^$name /d" "$file"
+            echo "Record deleted"
             ;;
 
         5)
             read -p "Enter name to modify: " name
-            if grep -q "^$name " "$file"; then
-                read -p "Enter new phone: " phone
-                sed -i "s/^$name .*/$name $phone/" "$file"
-                echo "Record modified"
-            else
-                echo "Record not found"
-            fi
+            read -p "Enter new phone: " phone
+            sed -i "/^$name /d" "$file"
+            echo "$name $phone" >> "$file"
+            echo "Record modified"
             ;;
 
         6)
-            echo "Exiting..."
             exit
             ;;
 
@@ -64,3 +52,4 @@ do
             echo "Invalid choice"
             ;;
     esac
+done
